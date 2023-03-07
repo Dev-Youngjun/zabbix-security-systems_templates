@@ -1,0 +1,398 @@
+zabbix_export:
+  version: '6.0'
+  date: '2023-03-07T07:20:17Z'
+  groups:
+    -
+      uuid: ee6cc5bc114a463fa926aee12b1c7695
+      name: Piolink
+  templates:
+    -
+      uuid: c6e369e4f0cc4ea780c1bc22064d217d
+      template: 'SNMP Piolink Devices v1.0.0'
+      name: 'SNMP Piolink Devices v1.0.0'
+      description: |
+        ## Overview
+        Monitors: Serial N., MAC Address, Firmware Version, Uptime,  CPU%, RAM (Total, Uesed, Free, %)
+        
+        ## Author
+        youngjun yoo
+      groups:
+        -
+          name: Piolink
+      items:
+        -
+          uuid: ffac7b72d56c4b2b8ee60158e274bd78
+          name: 'MP CPU utilization'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.10188.5.6.3.1.0
+          key: piolinkMPCPUUtil
+          delay: '60'
+          value_type: FLOAT
+          units: '%'
+          preprocessing:
+            -
+              type: CHANGE_PER_SECOND
+              parameters:
+                - ''
+            -
+              type: MULTIPLIER
+              parameters:
+                - '100'
+          tags:
+            -
+              tag: Application
+              value: 'Piolink Performance'
+            -
+              tag: component
+              value: cpu
+          triggers:
+            -
+              uuid: 7c4999c6ad95418f93546e06c8d64453
+              expression: 'avg(/SNMP Piolink Devices v1.0.0/piolinkMPCPUUtil,#5)>95'
+              name: 'Piolink {HOSTNAME} - Usage of MP CPU over 95%'
+              priority: AVERAGE
+              description: 'CPU activity on Fortinet is more than 95% during the last five checks'
+        -
+          uuid: dbf4eb5b5bd4450d9d9e0b977ac96936
+          name: 'MP Free Memory'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.10188.5.6.3.5.0
+          key: piolinkMPRAMFree
+          delay: '60'
+          value_type: FLOAT
+          units: GB
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |2
+                    var bytes = value * 1024;
+                    var gigabytes = bytes / (1024 * 1024 * 1024);
+                    gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                    return gigabytes;
+          tags:
+            -
+              tag: Application
+              value: 'Piolink Performance'
+            -
+              tag: component
+              value: memory
+        -
+          uuid: 0341cc4d748a4f48950340787b3029fb
+          name: 'MP Total Memory'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.10188.5.6.3.3.0
+          key: piolinkMPRAMTotal
+          delay: '60'
+          value_type: FLOAT
+          units: GB
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |2
+                    var bytes = value * 1024;
+                    var gigabytes = bytes / (1024 * 1024 * 1024);
+                    gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                    return gigabytes;
+          tags:
+            -
+              tag: Application
+              value: 'Piolink Performance'
+            -
+              tag: component
+              value: memory
+        -
+          uuid: b5087f8a01244e69b087a15ee62bc892
+          name: 'MP Used Memory'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.10188.5.6.3.4.0
+          key: piolinkMPRAMUsed
+          delay: '60'
+          value_type: FLOAT
+          units: GB
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |2
+                    var bytes = value * 1024;
+                    var gigabytes = bytes / (1024 * 1024 * 1024);
+                    gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                    return gigabytes;
+          tags:
+            -
+              tag: Application
+              value: 'Piolink Performance'
+            -
+              tag: component
+              value: memory
+        -
+          uuid: 0b92b68394c1477ab5f2dcf998366586
+          name: 'MP Memory utilization'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.10188.5.6.3.2.0
+          key: piolinkMPRAMUtil
+          delay: '60'
+          value_type: FLOAT
+          units: '%'
+          tags:
+            -
+              tag: Application
+              value: 'Piolink Performance'
+            -
+              tag: component
+              value: memory
+          triggers:
+            -
+              uuid: 0ab2109f4b4b4434ab65ed4f0a2a862d
+              expression: 'avg(/SNMP Piolink Devices v1.0.0/piolinkMPRAMUtil,#5)>100'
+              name: 'Piolink {HOSTNAME} - MP Memory Usage Over 100%'
+              priority: AVERAGE
+        -
+          uuid: 601a4e2e89b34d5193a13f75b0f08e59
+          name: 'PP CPU utilization'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.10188.5.6.3.6.0
+          key: piolinkPPCPUUtil
+          delay: '60'
+          value_type: FLOAT
+          units: '%'
+          preprocessing:
+            -
+              type: CHANGE_PER_SECOND
+              parameters:
+                - ''
+            -
+              type: MULTIPLIER
+              parameters:
+                - '100'
+          tags:
+            -
+              tag: Application
+              value: 'Piolink Performance'
+            -
+              tag: component
+              value: cpu
+          triggers:
+            -
+              uuid: 9a6168dbff254d449e2057abf70fdd34
+              expression: 'avg(/SNMP Piolink Devices v1.0.0/piolinkPPCPUUtil,#5)>95'
+              name: 'Piolink {HOSTNAME} - Usage of PP CPU over 95%'
+              priority: AVERAGE
+              description: 'CPU activity on Fortinet is more than 95% during the last five checks'
+        -
+          uuid: 2256d31f901d405dbf5b269a04fe5cbc
+          name: 'PP Free Memory'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.10188.5.6.3.10.0
+          key: piolinkPPRAMFree
+          delay: '60'
+          value_type: FLOAT
+          units: GB
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |2
+                    var bytes = value * 1024;
+                    var gigabytes = bytes / (1024 * 1024 * 1024);
+                    gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                    return gigabytes;
+          tags:
+            -
+              tag: Application
+              value: 'Piolink Performance'
+            -
+              tag: component
+              value: memory
+        -
+          uuid: 6e64191288c24be9b9d830d6acc39955
+          name: 'PP Total Memory'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.10188.5.6.3.8.0
+          key: piolinkPPRAMTotal
+          delay: '60'
+          value_type: FLOAT
+          units: GB
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |2
+                    var bytes = value * 1024;
+                    var gigabytes = bytes / (1024 * 1024 * 1024);
+                    gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                    return gigabytes;
+          tags:
+            -
+              tag: Application
+              value: 'Piolink Performance'
+            -
+              tag: component
+              value: memory
+        -
+          uuid: e71ad010c1bc4dd4b7ddaf215b2ef35f
+          name: 'PP Used Memory'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.10188.5.6.3.9.0
+          key: piolinkPPRAMUsed
+          delay: '60'
+          value_type: FLOAT
+          units: GB
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |2
+                    var bytes = value * 1024;
+                    var gigabytes = bytes / (1024 * 1024 * 1024);
+                    gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                    return gigabytes;
+          tags:
+            -
+              tag: Application
+              value: 'Piolink Performance'
+            -
+              tag: component
+              value: memory
+        -
+          uuid: 705cb92fcdfe4d70be0eea0b2b67084f
+          name: 'PP Memory utilization'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.10188.5.6.3.7.0
+          key: piolinkPPRAMUtil
+          delay: '60'
+          value_type: FLOAT
+          units: '%'
+          tags:
+            -
+              tag: Application
+              value: 'Piolink Performance'
+            -
+              tag: component
+              value: memory
+          triggers:
+            -
+              uuid: aef8956519de4c42ad9f1db602b9d043
+              expression: 'avg(/SNMP Piolink Devices v1.0.0/piolinkPPRAMUtil,#5)>100'
+              name: 'Piolink {HOSTNAME} - PP Memory Usage Over 100%'
+              priority: AVERAGE
+        -
+          uuid: 46626d07ff9745b8b0f38b55e0e2d45b
+          name: 'System Name'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.10188.5.6.2.1.0
+          key: piolinkSystemName
+          delay: '3600'
+          trends: '0'
+          value_type: CHAR
+          inventory_link: NAME
+          tags:
+            -
+              tag: Application
+              value: 'Piolink Performance'
+            -
+              tag: component
+              value: system
+        -
+          uuid: 3345aa50f81745a48a6d9e1ba79dcfc2
+          name: 'Piolink Uptime'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.25.1.1.0
+          key: piolinkUpTime
+          delay: '30'
+          units: uptime
+          preprocessing:
+            -
+              type: MULTIPLIER
+              parameters:
+                - '1e-2'
+          tags:
+            -
+              tag: Application
+              value: 'Piolink Performance'
+            -
+              tag: component
+              value: system
+          triggers:
+            -
+              uuid: b8df2ab909d7423583aa0f643f8e54ca
+              expression: 'last(/SNMP Piolink Devices v1.0.0/piolinkUpTime,#10)>last(/SNMP Piolink Devices v1.0.0/piolinkUpTime)'
+              name: 'Piolink {HOST.NAME} Rebooted'
+              priority: AVERAGE
+              description: 'The Fortinet has been rebooted during last 10 checks'
+        -
+          uuid: 5ebd35990a7d4aad80b17ea5c38e6192
+          name: 'Firmware Version'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.10188.5.6.2.3.0
+          key: SysmFirmwareVersion
+          delay: '3600'
+          trends: '0'
+          value_type: CHAR
+          inventory_link: OS
+          tags:
+            -
+              tag: Application
+              value: 'Piolink Performance'
+            -
+              tag: component
+              value: system
+        -
+          uuid: 4d00111b50bb41f397876fbbbcbcb5fc
+          name: 'Serial Number'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.10188.5.6.2.2.0
+          key: SysmSerialNumber
+          delay: '3600'
+          trends: '0'
+          value_type: CHAR
+          inventory_link: SERIALNO_A
+          tags:
+            -
+              tag: Application
+              value: 'Piolink Performance'
+            -
+              tag: component
+              value: system
+        -
+          uuid: 66d8253a955c4cb793bdeafbfe50cf34
+          name: 'MAC Address'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.10188.5.6.2.8.0
+          key: SystemMacAddress
+          delay: '3600'
+          trends: '0'
+          value_type: CHAR
+          inventory_link: MACADDRESS_A
+          tags:
+            -
+              tag: Application
+              value: 'Piolink Performance'
+            -
+              tag: component
+              value: system
+      macros:
+        -
+          macro: '{$SNMP_COMMUNITY}'
+          value: SI
+  graphs:
+    -
+      uuid: cb9905f3fce74513a7cc8b7966d0e34f
+      name: 'CPU %'
+      show_work_period: 'NO'
+      graph_items:
+        -
+          drawtype: GRADIENT_LINE
+          color: 00AA00
+          item:
+            host: 'SNMP Piolink Devices v1.0.0'
+            key: piolinkPPCPUUtil
+        -
+          sortorder: '1'
+          drawtype: GRADIENT_LINE
+          color: FFFF00
+          item:
+            host: 'SNMP Piolink Devices v1.0.0'
+            key: piolinkMPCPUUtil

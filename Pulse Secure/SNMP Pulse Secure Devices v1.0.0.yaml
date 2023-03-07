@@ -1,0 +1,218 @@
+zabbix_export:
+  version: '6.0'
+  date: '2023-03-07T07:22:10Z'
+  groups:
+    -
+      uuid: 7872a40c1b9c4c55add6f016cb7b0c5f
+      name: 'Pulse Secure'
+  templates:
+    -
+      uuid: 5d2ffd9e037b48fda3f77d1da334f108
+      template: 'SNMP Pulse Secure Devices v1.0.0'
+      name: 'SNMP Pulse Secure Devices v1.0.0'
+      description: |
+        ## Overview
+        Monitors: Firmware Version, System Uptime, CPU%, RAM%
+        
+        ## Author
+        youngjun yoo
+      groups:
+        -
+          name: 'Pulse Secure'
+      items:
+        -
+          uuid: c7ac313c691e4ef38f2bbc493abf733b
+          name: 'CPU utilization'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.12532.10.0
+          key: pulsesecureCurrentCPUUtil
+          delay: '60'
+          value_type: FLOAT
+          units: '%'
+          preprocessing:
+            -
+              type: CHANGE_PER_SECOND
+              parameters:
+                - ''
+            -
+              type: MULTIPLIER
+              parameters:
+                - '100'
+          tags:
+            -
+              tag: Application
+              value: 'Pulse Secure Performance'
+          triggers:
+            -
+              uuid: d2aa8f28644c447ab9bf245a2dc8b14a
+              expression: 'avg(/SNMP Pulse Secure Devices v1.0.0/pulsesecureCurrentCPUUtil,#5)>95'
+              name: 'Pulse Secure {HOSTNAME} - Usage of CPU over 95%'
+              priority: AVERAGE
+              description: 'CPU activity on Pulse Secure is more than 95% during the last five checks'
+        -
+          uuid: 0add3cc90e8b4f668fa34c5846ba38c2
+          name: 'Memory utilization'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.12532.11.0
+          key: pulsesecureCurrentRAMUtil
+          delay: '60'
+          value_type: FLOAT
+          units: '%'
+          tags:
+            -
+              tag: Application
+              value: 'Pulse Secure Performance'
+          triggers:
+            -
+              uuid: 0f7b4589cba64c8ca8c4d46fbfb83b13
+              expression: 'avg(/SNMP Pulse Secure Devices v1.0.0/pulsesecureCurrentRAMUtil,#5)>100'
+              name: 'Pulse Secure {HOSTNAME} - Memory Usage Over 100%'
+              priority: AVERAGE
+              description: 'Memory usage on Pulse Secure is more than 100% during the last five checks'
+        -
+          uuid: 654055be5b00409483e82a629ae65743
+          name: 'Pulse Secure Uptime'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.25.1.1.0
+          key: pulseUpTime
+          delay: '30'
+          units: uptime
+          preprocessing:
+            -
+              type: MULTIPLIER
+              parameters:
+                - '1e-2'
+          tags:
+            -
+              tag: Application
+              value: 'Pulse Secure Performance'
+          triggers:
+            -
+              uuid: a470530d3fb747a1976087be78a8eac4
+              expression: 'last(/SNMP Pulse Secure Devices v1.0.0/pulseUpTime,#10)>last(/SNMP Pulse Secure Devices v1.0.0/pulseUpTime)'
+              name: 'Pulse Secure {HOST.NAME} Rebooted'
+              priority: AVERAGE
+              description: 'The Pulse Secure has been rebooted during last 10 checks'
+        -
+          uuid: c42571ae31b649778911163aceb24c7b
+          name: 'Firmware Version'
+          type: SNMP_AGENT
+          snmp_oid: iso.3.6.1.4.1.12532.7.0
+          key: SysmFirmwareVersion
+          delay: '3600'
+          trends: '0'
+          value_type: CHAR
+          inventory_link: OS
+          tags:
+            -
+              tag: Application
+              value: 'Pulse Secure General'
+      discovery_rules:
+        -
+          uuid: 809dc09264c748d6b74a57deeb5adc7c
+          name: 'Network Interfaces'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.2.1.31.1.1.1.1]'
+          key: ifname
+          delay: '300'
+          item_prototypes:
+            -
+              uuid: 76552be87e55401c92492776644053c1
+              name: 'Link Speed $1'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.2.2.1.5.{#SNMPINDEX}'
+              key: 'ifHighSpeed[{#SNMPVALUE}]'
+              delay: '300'
+              history: 7d
+              trends: 180d
+              tags:
+                -
+                  tag: Application
+                  value: 'Link 10/100/1000'
+            -
+              uuid: 58ab68a0d2384e63ad60ce6fe4fcff40
+              name: 'Download $1'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.2.2.1.10.{#SNMPINDEX}'
+              key: 'ifInOctets[{#SNMPVALUE}]'
+              delay: '30'
+              units: bps
+              preprocessing:
+                -
+                  type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                -
+                  type: MULTIPLIER
+                  parameters:
+                    - '8'
+              tags:
+                -
+                  tag: Application
+                  value: 'Network Traffic'
+            -
+              uuid: 45bb9a8fc3a74c1d95a70c9805ec8097
+              name: 'Upload $1'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.2.2.1.16.{#SNMPINDEX}'
+              key: 'ifOutOctets[{#SNMPVALUE}]'
+              delay: '30'
+              units: bps
+              preprocessing:
+                -
+                  type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                -
+                  type: MULTIPLIER
+                  parameters:
+                    - '8'
+              tags:
+                -
+                  tag: Application
+                  value: 'Network Traffic'
+          graph_prototypes:
+            -
+              uuid: 9442f4e5a5374407acf0ffa61d3728d2
+              name: 'Network Traffic {#SNMPVALUE}'
+              graph_items:
+                -
+                  drawtype: GRADIENT_LINE
+                  color: 1A7C11
+                  item:
+                    host: 'SNMP Pulse Secure Devices v1.0.0'
+                    key: 'ifInOctets[{#SNMPVALUE}]'
+                -
+                  sortorder: '1'
+                  drawtype: GRADIENT_LINE
+                  color: F63100
+                  item:
+                    host: 'SNMP Pulse Secure Devices v1.0.0'
+                    key: 'ifOutOctets[{#SNMPVALUE}]'
+      macros:
+        -
+          macro: '{$SNMP_COMMUNITY}'
+          value: SI
+  graphs:
+    -
+      uuid: e4cef972f64441ff9b5c4611adfe4b72
+      name: 'CPU %'
+      show_work_period: 'NO'
+      graph_items:
+        -
+          drawtype: GRADIENT_LINE
+          color: 00AA00
+          item:
+            host: 'SNMP Pulse Secure Devices v1.0.0'
+            key: pulsesecureCurrentCPUUtil
+    -
+      uuid: 0d8790621fb8453cbf3d45e756d8eda1
+      name: 'RAM %'
+      show_work_period: 'NO'
+      graph_items:
+        -
+          drawtype: GRADIENT_LINE
+          color: C80000
+          item:
+            host: 'SNMP Pulse Secure Devices v1.0.0'
+            key: pulsesecureCurrentRAMUtil

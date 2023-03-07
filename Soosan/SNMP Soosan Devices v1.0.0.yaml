@@ -1,0 +1,426 @@
+zabbix_export:
+  version: '6.0'
+  date: '2023-03-07T07:25:11Z'
+  groups:
+    -
+      uuid: 27e7651f3b57410fa0e81073ca796eec
+      name: Soosan
+  templates:
+    -
+      uuid: 11de2ab2227b43ac9aff39b603553708
+      template: 'SNMP Soosan Devices v1.0.0'
+      name: 'SNMP Soosan Devices v1.0.0'
+      description: |
+        ## Overview
+        Monitors: System Name, Serial N., OS version, Package Version, CPU%, RAM(Total, Free, Used, %), Disk(Total, Free, Used, %)
+        
+        ## Author
+        youngjun yoo
+      groups:
+        -
+          name: Soosan
+      items:
+        -
+          uuid: 248e392909d147a69ba9ca6c308fa8d2
+          name: 'CPU utilization'
+          type: SNMP_AGENT
+          snmp_oid: iso.3.6.1.4.1.8403.78.1.1.2.1.2.1
+          key: soosanCPUUtil
+          delay: '60'
+          value_type: FLOAT
+          units: '%'
+          tags:
+            -
+              tag: Application
+              value: 'Soosan Performance'
+            -
+              tag: component
+              value: cpu
+          triggers:
+            -
+              uuid: 653be67984764a218ceec836adbf054a
+              expression: 'avg(/SNMP Soosan Devices v1.0.0/soosanCPUUtil,#5)>95'
+              name: 'Soosan {HOSTNAME} - Usage of MP CPU over 95%'
+              priority: AVERAGE
+              description: 'CPU activity on Fortinet is more than 95% during the last five checks'
+        -
+          uuid: 07a3409e9dea4211b685b9b887b84512
+          name: 'Free Disk /'
+          type: SNMP_AGENT
+          snmp_oid: iso.3.6.1.4.1.8403.78.1.1.4.1.5.1
+          key: soosanDiskFree1
+          delay: '60'
+          value_type: FLOAT
+          units: GB
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |2
+                    var bytes = value * 1024;
+                    var gigabytes = bytes / (1024 * 1024 * 1024);
+                    gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                    return gigabytes;
+          tags:
+            -
+              tag: Application
+              value: 'Soosan Performance'
+            -
+              tag: component
+              value: storage
+        -
+          uuid: 453057ffcf8f4dec8b2999a7356531d0
+          name: 'Free Disk /var'
+          type: SNMP_AGENT
+          snmp_oid: iso.3.6.1.4.1.8403.78.1.1.4.1.5.2
+          key: soosanDiskFree2
+          delay: '60'
+          value_type: FLOAT
+          units: GB
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |2
+                    var bytes = value * 1024;
+                    var gigabytes = bytes / (1024 * 1024 * 1024);
+                    gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                    return gigabytes;
+          tags:
+            -
+              tag: Application
+              value: 'Soosan Performance'
+            -
+              tag: component
+              value: storage
+        -
+          uuid: 52016f965f894a37920ff6582936ebe8
+          name: 'Total Disk /'
+          type: SNMP_AGENT
+          snmp_oid: iso.3.6.1.4.1.8403.78.1.1.4.1.3.1
+          key: soosanDiskTotal1
+          delay: '60'
+          value_type: FLOAT
+          units: GB
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |2
+                    var bytes = value * 1024;
+                    var gigabytes = bytes / (1024 * 1024 * 1024);
+                    gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                    return gigabytes;
+          tags:
+            -
+              tag: Application
+              value: 'Soosan Performance'
+            -
+              tag: component
+              value: storage
+        -
+          uuid: c9f64297cb4b4d45a501e94ac0c66143
+          name: 'Total Disk /var'
+          type: SNMP_AGENT
+          snmp_oid: iso.3.6.1.4.1.8403.78.1.1.4.1.3.2
+          key: soosanDiskTotal2
+          delay: '60'
+          value_type: FLOAT
+          units: GB
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |2
+                    var bytes = value * 1024;
+                    var gigabytes = bytes / (1024 * 1024 * 1024);
+                    gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                    return gigabytes;
+          tags:
+            -
+              tag: Application
+              value: 'Soosan Performance'
+            -
+              tag: component
+              value: storage
+        -
+          uuid: c9dfdc6cf7b5453584751d9de3bc9cf8
+          name: 'Used Disk /'
+          type: SNMP_AGENT
+          snmp_oid: iso.3.6.1.4.1.8403.78.1.1.4.1.4.1
+          key: soosanDiskUsed1
+          delay: '60'
+          value_type: FLOAT
+          units: GB
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |2
+                    var bytes = value * 1024;
+                    var gigabytes = bytes / (1024 * 1024 * 1024);
+                    gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                    return gigabytes;
+          tags:
+            -
+              tag: Application
+              value: 'Soosan Performance'
+            -
+              tag: component
+              value: storage
+        -
+          uuid: d87c2d99229748e79f481f86cc947990
+          name: 'Used Disk /var'
+          type: SNMP_AGENT
+          snmp_oid: iso.3.6.1.4.1.8403.78.1.1.4.1.4.2
+          key: soosanDiskUsed2
+          delay: '60'
+          value_type: FLOAT
+          units: GB
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |2
+                    var bytes = value * 1024;
+                    var gigabytes = bytes / (1024 * 1024 * 1024);
+                    gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                    return gigabytes;
+          tags:
+            -
+              tag: Application
+              value: 'Soosan Performance'
+            -
+              tag: component
+              value: storage
+        -
+          uuid: c801aa6c3eed4729819c687a96acab80
+          name: 'Disk  utilization /'
+          type: CALCULATED
+          key: soosanDiskutil1
+          delay: '60'
+          value_type: FLOAT
+          units: '%'
+          params: '100*last(//soosanDiskUsed1)/last(//soosanDiskTotal1)'
+          tags:
+            -
+              tag: Application
+              value: 'Soosan Performance'
+            -
+              tag: component
+              value: storage
+        -
+          uuid: 08aefe97191e46bab94230b21b26c335
+          name: 'Disk  utilization /var'
+          type: CALCULATED
+          key: soosanDiskutil2
+          delay: '60'
+          value_type: FLOAT
+          units: '%'
+          params: '100*last(//soosanDiskUsed2)/last(//soosanDiskTotal2)'
+          tags:
+            -
+              tag: Application
+              value: 'Soosan Performance'
+            -
+              tag: component
+              value: storage
+        -
+          uuid: d22f0b890fec483da47e9c0b09d72268
+          name: 'Free Memory'
+          type: SNMP_AGENT
+          snmp_oid: iso.3.6.1.4.1.8403.78.1.1.3.1.4.1
+          key: soosanRAMFree
+          delay: '60'
+          value_type: FLOAT
+          units: GB
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |2
+                    var bytes = value * 1024;
+                    var gigabytes = bytes / (1024 * 1024 * 1024);
+                    gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                    return gigabytes;
+          tags:
+            -
+              tag: Application
+              value: 'Soosan Performance'
+            -
+              tag: component
+              value: memory
+        -
+          uuid: d768c835ef7d43edb1ae9495a5284240
+          name: 'Total Memory'
+          type: SNMP_AGENT
+          snmp_oid: iso.3.6.1.4.1.8403.78.1.1.3.1.2.1
+          key: soosanRAMTotal
+          delay: '60'
+          value_type: FLOAT
+          units: GB
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |2
+                    var bytes = value * 1024;
+                    var gigabytes = bytes / (1024 * 1024 * 1024);
+                    gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                    return gigabytes;
+          tags:
+            -
+              tag: Application
+              value: 'Soosan Performance'
+            -
+              tag: component
+              value: memory
+        -
+          uuid: bd945a60a8404b449c447d5a04d61c3a
+          name: 'Used Memory'
+          type: SNMP_AGENT
+          snmp_oid: iso.3.6.1.4.1.8403.78.1.1.3.1.3.1
+          key: soosanRAMUsed
+          delay: '60'
+          value_type: FLOAT
+          units: GB
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |2
+                    var bytes = value * 1024;
+                    var gigabytes = bytes / (1024 * 1024 * 1024);
+                    gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                    return gigabytes;
+          tags:
+            -
+              tag: Application
+              value: 'Soosan Performance'
+            -
+              tag: component
+              value: memory
+        -
+          uuid: 032d7067f4f24729954d2eb2573673bb
+          name: 'Memory utilization'
+          type: SNMP_AGENT
+          snmp_oid: iso.3.6.1.4.1.8403.78.1.1.3.1.5.1
+          key: soosanRAMUtil
+          delay: '60'
+          value_type: FLOAT
+          units: '%'
+          tags:
+            -
+              tag: Application
+              value: 'Soosan Performance'
+            -
+              tag: component
+              value: memory
+          triggers:
+            -
+              uuid: fb62b9ada28b451ea30c2b4102b958c3
+              expression: 'avg(/SNMP Soosan Devices v1.0.0/soosanRAMUtil,#5)>100'
+              name: 'Soosan {HOSTNAME} - MP Memory Usage Over 100%'
+              priority: AVERAGE
+        -
+          uuid: 70bf86847b574c0da80daae35d299ee5
+          name: 'System Name'
+          type: SNMP_AGENT
+          snmp_oid: iso.3.6.1.4.1.8403.78.1.2.1.0
+          key: soosanSystemName
+          delay: '3600'
+          trends: '0'
+          value_type: CHAR
+          inventory_link: NAME
+          tags:
+            -
+              tag: Application
+              value: 'Soosan Performance'
+            -
+              tag: component
+              value: system
+        -
+          uuid: f35e895c2dd24a3cb0d620384090f829
+          name: 'Firmware Version'
+          type: SNMP_AGENT
+          snmp_oid: iso.3.6.1.4.1.8403.78.1.2.3.0
+          key: SysmFirmwareVersion
+          delay: '3600'
+          trends: '0'
+          value_type: CHAR
+          inventory_link: OS
+          tags:
+            -
+              tag: Application
+              value: 'Soosan Performance'
+            -
+              tag: component
+              value: system
+        -
+          uuid: 40e524eebfa44a6d9e41b0125210e3cf
+          name: 'Package Version'
+          type: SNMP_AGENT
+          snmp_oid: iso.3.6.1.4.1.8403.78.1.2.2.0
+          key: SysmPackageVersion
+          delay: '3600'
+          trends: '0'
+          value_type: CHAR
+          inventory_link: SOFTWARE_FULL
+          tags:
+            -
+              tag: Application
+              value: 'Soosan Performance'
+            -
+              tag: component
+              value: system
+        -
+          uuid: 42cd71239a124d1cbc11a7ed24c5c4ea
+          name: 'Serial Number'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.10188.5.6.2.2.0
+          key: SysmSerialNumber
+          delay: '3600'
+          trends: '0'
+          value_type: CHAR
+          inventory_link: SERIALNO_A
+          tags:
+            -
+              tag: Application
+              value: 'Soosan Performance'
+            -
+              tag: component
+              value: system
+        -
+          uuid: 2cb9e9cac07e4df992acdbb04cb1851f
+          name: 'MAC Address'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.10188.5.6.2.8.0
+          key: SystemMacAddress
+          delay: '3600'
+          trends: '0'
+          value_type: CHAR
+          inventory_link: MACADDRESS_A
+          tags:
+            -
+              tag: Application
+              value: 'Soosan Performance'
+            -
+              tag: component
+              value: system
+      macros:
+        -
+          macro: '{$SNMP_COMMUNITY}'
+          value: SI
+  graphs:
+    -
+      uuid: e9b9e00ba5ec4b74908be3d3ea251b0f
+      name: 'CPU %'
+      show_work_period: 'NO'
+      graph_items:
+        -
+          sortorder: '1'
+          drawtype: GRADIENT_LINE
+          color: FFFF00
+          item:
+            host: 'SNMP Soosan Devices v1.0.0'
+            key: soosanCPUUtil

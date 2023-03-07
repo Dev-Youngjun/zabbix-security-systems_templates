@@ -1,0 +1,429 @@
+zabbix_export:
+  version: '6.0'
+  date: '2023-03-07T07:17:20Z'
+  groups:
+    -
+      uuid: 3e8f28c2d8e34adf8416cb27eaed1ce4
+      name: Genian
+  templates:
+    -
+      uuid: 10ade38de605480dbf5af90f5218ed57
+      template: 'Genian SNMP DATA v1.0.0'
+      name: 'Genian SNMP DATA v1.0.0'
+      description: |
+        ## Overview
+        Monitors:  System Uptime, CPU%, RAM%, Disk (Total and Used and %)
+        
+        ## Author
+        Youngjun Yoo
+      groups:
+        -
+          name: Genian
+      items:
+        -
+          uuid: 1ce227e6c6a3486f8fabc793fa155a8b
+          name: 'Available Disk'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.2021.9.1.7.2
+          key: genianAvailableDisk
+          delay: '60'
+          value_type: FLOAT
+          units: GB
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |2
+                    var bytes = value * 1024;
+                    var gigabytes = bytes / (1024 * 1024 * 1024);
+                    gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                    return gigabytes;
+          tags:
+            -
+              tag: Application
+              value: 'Genian Performance'
+            -
+              tag: component
+              value: storage
+        -
+          uuid: e5b209ae6cc840269e7e18f0bd8ff968
+          name: 'Available Disk - SSD'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.2021.9.1.7.3
+          key: genianAvailableDiskSSD
+          delay: '60'
+          value_type: FLOAT
+          units: GB
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |2
+                    var bytes = value * 1024;
+                    var gigabytes = bytes / (1024 * 1024 * 1024);
+                    gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                    return gigabytes;
+          tags:
+            -
+              tag: Application
+              value: 'Genian Performance'
+            -
+              tag: component
+              value: storage
+        -
+          uuid: 5364017abc824633a4dd15ba10979a4e
+          name: 'CPU utilization'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.2021.11.9.0
+          key: genianCurrentCPUUtil
+          delay: '60'
+          value_type: FLOAT
+          units: '%'
+          preprocessing:
+            -
+              type: CHANGE_PER_SECOND
+              parameters:
+                - ''
+            -
+              type: MULTIPLIER
+              parameters:
+                - '100'
+          tags:
+            -
+              tag: Application
+              value: 'Genian Performance'
+            -
+              tag: component
+              value: cpu
+          triggers:
+            -
+              uuid: b71a53b8689143f4a576809fcd850674
+              expression: 'avg(/Genian SNMP DATA v1.0.0/genianCurrentCPUUtil,#5)>95'
+              name: 'Genian {HOSTNAME} - Usage of CPU over 95%'
+              priority: AVERAGE
+              description: 'CPU activity on Genian is more than 95% during the last five checks'
+        -
+          uuid: b02f57a45e124300a148ce79196383eb
+          name: 'Buffered Memory'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.2021.4.14.0
+          key: genianCurrentRAMBuffered
+          delay: '60'
+          value_type: FLOAT
+          units: GB
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |2
+                    var bytes = value * 1024;
+                    var gigabytes = bytes / (1024 * 1024 * 1024);
+                    gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                    return gigabytes;
+          tags:
+            -
+              tag: Application
+              value: 'Genian Performance'
+            -
+              tag: component
+              value: memory
+        -
+          uuid: 06a584f6cd374e88b712eaeae9407d6c
+          name: 'Cached Memory'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.2021.4.15.0
+          key: genianCurrentRAMCached
+          delay: '60'
+          value_type: FLOAT
+          units: GB
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |2
+                    var bytes = value * 1024;
+                    var gigabytes = bytes / (1024 * 1024 * 1024);
+                    gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                    return gigabytes;
+          tags:
+            -
+              tag: Application
+              value: 'Genian Performance'
+            -
+              tag: component
+              value: memory
+        -
+          uuid: 17ed126d8bd44ef19bb9638e1e5d95c5
+          name: 'Free Memory'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.2021.4.6.0
+          key: genianCurrentRAMFree
+          delay: '60'
+          value_type: FLOAT
+          units: GB
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |2
+                    var bytes = value * 1024;
+                    var gigabytes = bytes / (1024 * 1024 * 1024);
+                    gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                    return gigabytes;
+          tags:
+            -
+              tag: Application
+              value: 'Genian Performance'
+            -
+              tag: component
+              value: memory
+        -
+          uuid: 8b666d97201e4f519f20dcaee8d784c0
+          name: 'Total Memory'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.2021.4.5.0
+          key: genianCurrentRAMTotal
+          delay: '3600'
+          value_type: FLOAT
+          units: GB
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |2
+                    var bytes = value * 1024;
+                    var gigabytes = bytes / (1024 * 1024 * 1024);
+                    gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                    return gigabytes;
+          tags:
+            -
+              tag: Application
+              value: 'Genian Performance'
+            -
+              tag: component
+              value: memory
+        -
+          uuid: 134bb867312d4e478455dd66d926f7cf
+          name: 'Used Memory'
+          type: CALCULATED
+          key: genianCurrentRAMUsed
+          delay: '60'
+          value_type: FLOAT
+          units: GB
+          params: last(//genianCurrentRAMTotal)-last(//genianCurrentRAMFree)-last(//genianCurrentRAMBuffered)-last(//genianCurrentRAMCached)
+          tags:
+            -
+              tag: Application
+              value: 'Genian Performance'
+            -
+              tag: component
+              value: memory
+        -
+          uuid: 44b64749a16c4f0fa0dd62959850e3b4
+          name: 'Memory utilization'
+          type: CALCULATED
+          key: genianCurrentRAMUtil
+          delay: '60'
+          value_type: FLOAT
+          units: '%'
+          params: '100*last(//genianCurrentRAMUsed)/last(//genianCurrentRAMTotal)'
+          tags:
+            -
+              tag: Application
+              value: 'Genian Performance'
+            -
+              tag: component
+              value: memory
+        -
+          uuid: 5a3021c0002c4708b817f45c9c9a0319
+          name: 'Total Disk'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.2021.9.1.6.2
+          key: genianTotalDisk
+          delay: '3600'
+          value_type: FLOAT
+          units: GB
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |2
+                    var bytes = value * 1024;
+                    var gigabytes = bytes / (1024 * 1024 * 1024);
+                    gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                    return gigabytes;
+          tags:
+            -
+              tag: Application
+              value: 'Genian Performance'
+            -
+              tag: component
+              value: storage
+        -
+          uuid: 90293fb8326141a1a6e3029df14a321a
+          name: 'Total Disk - SSD'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.2021.9.1.6.3
+          key: genianTotalDiskSSD
+          delay: '3600'
+          value_type: FLOAT
+          units: GB
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |2
+                    var bytes = value * 1024;
+                    var gigabytes = bytes / (1024 * 1024 * 1024);
+                    gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                    return gigabytes;
+          tags:
+            -
+              tag: Application
+              value: 'Genian Performance'
+            -
+              tag: component
+              value: storage
+        -
+          uuid: 188c7ca84fee4a9881800e2ba68fa9a1
+          name: 'Genian Uptime'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.3.0
+          key: genianUpTime
+          delay: '30'
+          units: uptime
+          preprocessing:
+            -
+              type: MULTIPLIER
+              parameters:
+                - '1e-2'
+          tags:
+            -
+              tag: Application
+              value: 'Genian Performance'
+            -
+              tag: component
+              value: system
+          triggers:
+            -
+              uuid: 529bf35bd6a54713af60450c53b67d2f
+              expression: 'last(/Genian SNMP DATA v1.0.0/genianUpTime,#10)>last(/Genian SNMP DATA v1.0.0/genianUpTime)'
+              name: 'Genian {HOST.NAME} Rebooted'
+              priority: AVERAGE
+              description: 'The Genian has been rebooted during last 10 checks'
+        -
+          uuid: 7720b261f75749549c3be3be97b3fbfc
+          name: 'Used Disk'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.2021.9.1.8.2
+          key: genianUsedDisk
+          delay: '3600'
+          value_type: FLOAT
+          units: GB
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |2
+                    var bytes = value * 1024;
+                    var gigabytes = bytes / (1024 * 1024 * 1024);
+                    gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                    return gigabytes;
+          tags:
+            -
+              tag: Application
+              value: 'Genian Performance'
+            -
+              tag: component
+              value: storage
+        -
+          uuid: 2fd3a3bd3d574e31b18a2e1a9a9b3d70
+          name: 'Used Disk - SSD'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.2021.9.1.8.3
+          key: genianUsedDiskSSD
+          delay: '3600'
+          value_type: FLOAT
+          units: GB
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |2
+                    var bytes = value * 1024;
+                    var gigabytes = bytes / (1024 * 1024 * 1024);
+                    gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                    return gigabytes;
+          tags:
+            -
+              tag: Application
+              value: 'Genian Performance'
+            -
+              tag: component
+              value: storage
+        -
+          uuid: cc7268671aeb4c59b7b25e7b2b452a00
+          name: 'Disk utilization'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.2021.9.1.9.2
+          key: genianUtilDisk
+          delay: '60'
+          value_type: FLOAT
+          units: '%'
+          tags:
+            -
+              tag: Application
+              value: 'Genian Performance'
+            -
+              tag: component
+              value: storage
+        -
+          uuid: 37833b9752fe49ea8a54b0b34b44800a
+          name: 'Disk utilization - SSD'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.2021.9.1.9.3
+          key: genianUtilDiskSSD
+          delay: '60'
+          value_type: FLOAT
+          units: '%'
+          tags:
+            -
+              tag: Application
+              value: 'Genian Performance'
+            -
+              tag: component
+              value: storage
+      macros:
+        -
+          macro: '{$SNMP_COMMUNITY}'
+          value: SI
+  graphs:
+    -
+      uuid: dcbed7edd05d406593411ee905dddd3f
+      name: 'CPU %'
+      show_work_period: 'NO'
+      graph_items:
+        -
+          drawtype: GRADIENT_LINE
+          color: 00AA00
+          item:
+            host: 'Genian SNMP DATA v1.0.0'
+            key: genianCurrentCPUUtil
+    -
+      uuid: f6f461ac36c24d9a89847097632d1a9f
+      name: 'Disk use'
+      width: '400'
+      height: '400'
+      yaxismax: '0'
+      show_work_period: 'NO'
+      show_triggers: 'NO'
+      type: PIE
+      show_3d: 'YES'
+      graph_items:
+        -
+          sortorder: '1'
+          color: '006600'
+          type: GRAPH_SUM
+          item:
+            host: 'Genian SNMP DATA v1.0.0'
+            key: genianTotalDiskSSD
