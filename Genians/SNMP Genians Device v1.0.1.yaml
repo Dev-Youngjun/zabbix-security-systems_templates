@@ -1,0 +1,555 @@
+zabbix_export:
+  version: '6.0'
+  date: '2023-03-09T06:55:17Z'
+  groups:
+    -
+      uuid: 3e8f28c2d8e34adf8416cb27eaed1ce4
+      name: Genian
+  templates:
+    -
+      uuid: 10ade38de605480dbf5af90f5218ed57
+      template: 'SNMP Genians Device v1.0.0'
+      name: 'SNMP Genians Device v1.0.0'
+      description: |
+        ## Overview
+        Monitors:  System Uptime, CPU%, RAM%, Disk (Total and Used and %)
+        
+        ## Author
+        Youngjun Yoo
+      groups:
+        -
+          name: Genian
+      items:
+        -
+          uuid: 5364017abc824633a4dd15ba10979a4e
+          name: 'CPU utilization'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.2021.11.9.0
+          key: genianCurrentCPUUtil
+          delay: '60'
+          value_type: FLOAT
+          units: '%'
+          preprocessing:
+            -
+              type: CHANGE_PER_SECOND
+              parameters:
+                - ''
+            -
+              type: MULTIPLIER
+              parameters:
+                - '100'
+          tags:
+            -
+              tag: Application
+              value: 'Genian Performance'
+            -
+              tag: component
+              value: cpu
+          triggers:
+            -
+              uuid: b71a53b8689143f4a576809fcd850674
+              expression: 'avg(/SNMP Genians Device v1.0.0/genianCurrentCPUUtil,#5)>95'
+              name: 'Genian {HOSTNAME} - Usage of CPU over 95%'
+              priority: AVERAGE
+              description: 'CPU activity on Genian is more than 95% during the last five checks'
+        -
+          uuid: b02f57a45e124300a148ce79196383eb
+          name: 'Buffered Memory'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.2021.4.14.0
+          key: genianCurrentRAMBuffered
+          delay: '60'
+          value_type: FLOAT
+          units: GB
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |2
+                    var bytes = value * 1024;
+                    var gigabytes = bytes / (1024 * 1024 * 1024);
+                    gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                    return gigabytes;
+          tags:
+            -
+              tag: Application
+              value: 'Genian Performance'
+            -
+              tag: component
+              value: memory
+        -
+          uuid: 06a584f6cd374e88b712eaeae9407d6c
+          name: 'Cached Memory'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.2021.4.15.0
+          key: genianCurrentRAMCached
+          delay: '60'
+          value_type: FLOAT
+          units: GB
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |2
+                    var bytes = value * 1024;
+                    var gigabytes = bytes / (1024 * 1024 * 1024);
+                    gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                    return gigabytes;
+          tags:
+            -
+              tag: Application
+              value: 'Genian Performance'
+            -
+              tag: component
+              value: memory
+        -
+          uuid: 17ed126d8bd44ef19bb9638e1e5d95c5
+          name: 'Free Memory'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.2021.4.6.0
+          key: genianCurrentRAMFree
+          delay: '60'
+          value_type: FLOAT
+          units: GB
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |2
+                    var bytes = value * 1024;
+                    var gigabytes = bytes / (1024 * 1024 * 1024);
+                    gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                    return gigabytes;
+          tags:
+            -
+              tag: Application
+              value: 'Genian Performance'
+            -
+              tag: component
+              value: memory
+        -
+          uuid: 8b666d97201e4f519f20dcaee8d784c0
+          name: 'Total Memory'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.2021.4.5.0
+          key: genianCurrentRAMTotal
+          delay: '3600'
+          value_type: FLOAT
+          units: GB
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |2
+                    var bytes = value * 1024;
+                    var gigabytes = bytes / (1024 * 1024 * 1024);
+                    gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                    return gigabytes;
+          tags:
+            -
+              tag: Application
+              value: 'Genian Performance'
+            -
+              tag: component
+              value: memory
+        -
+          uuid: 134bb867312d4e478455dd66d926f7cf
+          name: 'Used Memory'
+          type: CALCULATED
+          key: genianCurrentRAMUsed
+          delay: '60'
+          value_type: FLOAT
+          units: GB
+          params: last(//genianCurrentRAMTotal)-last(//genianCurrentRAMFree)-last(//genianCurrentRAMBuffered)-last(//genianCurrentRAMCached)
+          tags:
+            -
+              tag: Application
+              value: 'Genian Performance'
+            -
+              tag: component
+              value: memory
+        -
+          uuid: 44b64749a16c4f0fa0dd62959850e3b4
+          name: 'Memory utilization'
+          type: CALCULATED
+          key: genianCurrentRAMUtil
+          delay: '60'
+          value_type: FLOAT
+          units: '%'
+          params: '100*last(//genianCurrentRAMUsed)/last(//genianCurrentRAMTotal)'
+          tags:
+            -
+              tag: Application
+              value: 'Genian Performance'
+            -
+              tag: component
+              value: memory
+        -
+          uuid: 188c7ca84fee4a9881800e2ba68fa9a1
+          name: 'Genian Uptime'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.3.0
+          key: genianUpTime
+          delay: '30'
+          units: uptime
+          preprocessing:
+            -
+              type: MULTIPLIER
+              parameters:
+                - '1e-2'
+          tags:
+            -
+              tag: Application
+              value: 'Genian Performance'
+            -
+              tag: component
+              value: system
+          triggers:
+            -
+              uuid: 529bf35bd6a54713af60450c53b67d2f
+              expression: 'last(/SNMP Genians Device v1.0.0/genianUpTime,#10)>last(/SNMP Genians Device v1.0.0/genianUpTime)'
+              name: 'Genian {HOST.NAME} Rebooted'
+              priority: AVERAGE
+              description: 'The Genian has been rebooted during last 10 checks'
+        -
+          uuid: 8b89279ddf1240ba82c375503a6a516b
+          name: 'ICMP ping'
+          type: SIMPLE
+          key: icmpping
+          history: 1w
+          tags:
+            -
+              tag: component
+              value: health
+            -
+              tag: component
+              value: network
+          triggers:
+            -
+              uuid: 08f94c38925041108cd5e680afdc6988
+              expression: 'max(/SNMP Genians Device v1.0.0/icmpping,#3)=0'
+              name: 'Unavailable by ICMP ping'
+              priority: HIGH
+              description: 'Last three attempts returned timeout.  Please check device connectivity.'
+              tags:
+                -
+                  tag: scope
+                  value: availability
+        -
+          uuid: 2ede5bd5b0bd4af19bd3f1214c8bcef0
+          name: 'ICMP loss'
+          type: SIMPLE
+          key: icmppingloss
+          history: 1w
+          value_type: FLOAT
+          units: '%'
+          tags:
+            -
+              tag: component
+              value: health
+            -
+              tag: component
+              value: network
+          triggers:
+            -
+              uuid: 135e1a9d11ac45d0b1c4fd1d6170b8c9
+              expression: 'min(/SNMP Genians Device v1.0.0/icmppingloss,5m)>{$ICMP_LOSS_WARN} and min(/SNMP Genians Device v1.0.0/icmppingloss,5m)<100'
+              name: 'High ICMP ping loss'
+              opdata: 'Loss: {ITEM.LASTVALUE1}'
+              priority: WARNING
+              dependencies:
+                -
+                  name: 'Unavailable by ICMP ping'
+                  expression: 'max(/SNMP Genians Device v1.0.0/icmpping,#3)=0'
+              tags:
+                -
+                  tag: scope
+                  value: availability
+                -
+                  tag: scope
+                  value: performance
+        -
+          uuid: e4c1139880f54494b7defc0b1f0c67fb
+          name: 'ICMP response time'
+          type: SIMPLE
+          key: icmppingsec
+          history: 1w
+          value_type: FLOAT
+          units: s
+          tags:
+            -
+              tag: component
+              value: health
+            -
+              tag: component
+              value: network
+          triggers:
+            -
+              uuid: a4c15142dca648fa9462b4bc0e37b947
+              expression: 'avg(/SNMP Genians Device v1.0.0/icmppingsec,5m)>{$ICMP_RESPONSE_TIME_WARN}'
+              name: 'High ICMP ping response time'
+              opdata: 'Value: {ITEM.LASTVALUE1}'
+              priority: WARNING
+              dependencies:
+                -
+                  name: 'High ICMP ping loss'
+                  expression: 'min(/SNMP Genians Device v1.0.0/icmppingloss,5m)>{$ICMP_LOSS_WARN} and min(/SNMP Genians Device v1.0.0/icmppingloss,5m)<100'
+                -
+                  name: 'Unavailable by ICMP ping'
+                  expression: 'max(/SNMP Genians Device v1.0.0/icmpping,#3)=0'
+              tags:
+                -
+                  tag: scope
+                  value: availability
+                -
+                  tag: scope
+                  value: performance
+        -
+          uuid: c744e8855c1b4809b25020cd35cb3f68
+          name: 'SNMP agent availability'
+          type: INTERNAL
+          key: 'zabbix[host,snmp,available]'
+          history: 7d
+          description: |
+            Availability of SNMP checks on the host. The value of this item corresponds to availability icons in the host list.
+            Possible value:
+            0 - not available
+            1 - available
+            2 - unknown
+          tags:
+            -
+              tag: component
+              value: health
+            -
+              tag: component
+              value: network
+          triggers:
+            -
+              uuid: b6c7faff54134996a408d8934d89f604
+              expression: 'max(/SNMP Genians Device v1.0.0/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0'
+              name: 'No SNMP data collection'
+              opdata: 'Current state: {ITEM.LASTVALUE1}'
+              priority: WARNING
+              description: 'SNMP is not available for polling. Please check device connectivity and SNMP settings.'
+              dependencies:
+                -
+                  name: 'Unavailable by ICMP ping'
+                  expression: 'max(/SNMP Genians Device v1.0.0/icmpping,#3)=0'
+              tags:
+                -
+                  tag: scope
+                  value: availability
+      discovery_rules:
+        -
+          uuid: 4557332cd8d64a9285546ad8fe5822ba
+          name: 'genian filesystem discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#FSNAME},iso.3.6.1.4.1.2021.9.1.2]'
+          key: 'geniandiskdiscovery[snmp]'
+          item_prototypes:
+            -
+              uuid: cc07c0d066c04db4b544cdd796615efb
+              name: 'Free Disk {#FSNAME}'
+              type: SNMP_AGENT
+              snmp_oid: 'iso.3.6.1.4.1.2021.9.1.7.{#SNMPINDEX}'
+              key: 'genianFreeDisk.[{#SNMPINDEX}]'
+              value_type: FLOAT
+              units: GB
+              preprocessing:
+                -
+                  type: JAVASCRIPT
+                  parameters:
+                    - |2
+                        var bytes = value * 1024;
+                        var gigabytes = bytes / (1024 * 1024 * 1024);
+                        gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                        return gigabytes;
+              tags:
+                -
+                  tag: Application
+                  value: 'Genian Performance'
+                -
+                  tag: component
+                  value: storage
+            -
+              uuid: 2422694cae4a40b7b898b9057a4ea564
+              name: 'Total Disk {#FSNAME}'
+              type: SNMP_AGENT
+              snmp_oid: 'iso.3.6.1.4.1.2021.9.1.6.{#SNMPINDEX}'
+              key: 'genianTotalDisk.[{#SNMPINDEX}]'
+              value_type: FLOAT
+              units: GB
+              preprocessing:
+                -
+                  type: JAVASCRIPT
+                  parameters:
+                    - |2
+                        var bytes = value * 1024;
+                        var gigabytes = bytes / (1024 * 1024 * 1024);
+                        gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                        return gigabytes;
+              tags:
+                -
+                  tag: Application
+                  value: 'Genian Performance'
+                -
+                  tag: component
+                  value: storage
+            -
+              uuid: 265f9e0cbfb84519b32b44e3041efc86
+              name: 'Used Disk {#FSNAME}'
+              type: SNMP_AGENT
+              snmp_oid: 'iso.3.6.1.4.1.2021.9.1.8.{#SNMPINDEX}'
+              key: 'genianUsedDisk.[{#SNMPINDEX}]'
+              value_type: FLOAT
+              units: GB
+              preprocessing:
+                -
+                  type: JAVASCRIPT
+                  parameters:
+                    - |2
+                        var bytes = value * 1024;
+                        var gigabytes = bytes / (1024 * 1024 * 1024);
+                        gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                        return gigabytes;
+              tags:
+                -
+                  tag: Application
+                  value: 'Genian Performance'
+                -
+                  tag: component
+                  value: storage
+            -
+              uuid: 818ed921aa3f4674885122168772e232
+              name: 'Disk utilization {#FSNAME}'
+              type: SNMP_AGENT
+              snmp_oid: 'iso.3.6.1.4.1.2021.9.1.9.{#SNMPINDEX}'
+              key: 'genianUtilDisk.[{#SNMPINDEX}]'
+              value_type: FLOAT
+              units: '%'
+              tags:
+                -
+                  tag: Application
+                  value: 'Genian Performance'
+                -
+                  tag: component
+                  value: storage
+              trigger_prototypes:
+                -
+                  uuid: 4429b2138750417c994b028020b46fc9
+                  expression: 'avg(/SNMP Genians Device v1.0.0/genianUtilDisk.[{#SNMPINDEX}],#5)>90'
+                  name: 'Genian {HOSTNAME} - Usage of FS {#FSNAME} over 90%'
+                  priority: AVERAGE
+        -
+          uuid: 2650c287b0cc428fa1fadd24c7f1bfa8
+          name: 'genian interface discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#IFNAME},iso.3.6.1.2.1.2.2.1.2]'
+          key: 'genianifdiscovery[snmp]'
+          item_prototypes:
+            -
+              uuid: 3b38f6a2e14c468fa2f52e6be373f22a
+              name: 'Link Speed {#IFNAME}'
+              type: SNMP_AGENT
+              snmp_oid: 'iso.3.6.1.2.1.2.2.1.5.{#SNMPINDEX}'
+              key: 'genianifHighSpeed.[{#IFNAME}]'
+              delay: 10m
+              tags:
+                -
+                  tag: Application
+                  value: 'Genian Performance'
+                -
+                  tag: component
+                  value: network
+            -
+              uuid: 821d476aeae44f2b89bcfd3e106a65ee
+              name: 'Download {#IFNAME}'
+              type: SNMP_AGENT
+              snmp_oid: 'iso.3.6.1.2.1.2.2.1.10.{#SNMPINDEX}'
+              key: 'genianifInOctest.[{#IFNAME}]'
+              value_type: FLOAT
+              units: GB
+              preprocessing:
+                -
+                  type: JAVASCRIPT
+                  parameters:
+                    - |2
+                        var bytes = value * 1024;
+                        var gigabytes = bytes / (1024 * 1024 * 1024 * 1024);
+                        gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                        return gigabytes;
+              tags:
+                -
+                  tag: Application
+                  value: 'Genian Performance'
+                -
+                  tag: component
+                  value: network
+            -
+              uuid: 4ef67767a9a84aa0a53a7fc60ae5da54
+              name: 'Upload {#IFNAME}'
+              type: SNMP_AGENT
+              snmp_oid: 'iso.3.6.1.2.1.2.2.1.16.{#SNMPINDEX}'
+              key: 'genianifOutOctest.[{#IFNAME}]'
+              value_type: FLOAT
+              preprocessing:
+                -
+                  type: JAVASCRIPT
+                  parameters:
+                    - |2
+                        var bytes = value * 1024;
+                        var gigabytes = bytes / (1024 * 1024 * 1024 * 1024);
+                        gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                        return gigabytes;
+              tags:
+                -
+                  tag: Application
+                  value: 'Genian Performance'
+                -
+                  tag: component
+                  value: network
+            -
+              uuid: b03f96697a3a45fc865acf31502e3270
+              name: 'Link Status {#IFNAME}'
+              type: SNMP_AGENT
+              snmp_oid: 'iso.3.6.1.2.1.2.2.1.8.{#SNMPINDEX}'
+              key: 'genianifStat.[{#IFNAME}]'
+              delay: 30s
+              tags:
+                -
+                  tag: Application
+                  value: 'Genian Performance'
+                -
+                  tag: component
+                  value: network
+              trigger_prototypes:
+                -
+                  uuid: d0da3c8f30f943cc94dd2eb90fabf895
+                  expression: 'last(/SNMP Genians Device v1.0.0/genianifStat.[{#IFNAME}])<>1'
+                  name: '{#IFNAME} Interface Down'
+                  priority: AVERAGE
+      macros:
+        -
+          macro: '{$ICMP_LOSS_WARN}'
+          value: '20'
+        -
+          macro: '{$ICMP_RESPONSE_TIME_WARN}'
+          value: '0.15'
+        -
+          macro: '{$SNMP.TIMEOUT}'
+          value: 5m
+        -
+          macro: '{$SNMP_COMMUNITY}'
+          value: SI
+  graphs:
+    -
+      uuid: dcbed7edd05d406593411ee905dddd3f
+      name: 'CPU %'
+      show_work_period: 'NO'
+      graph_items:
+        -
+          drawtype: GRADIENT_LINE
+          color: 00AA00
+          item:
+            host: 'SNMP Genians Device v1.0.0'
+            key: genianCurrentCPUUtil
