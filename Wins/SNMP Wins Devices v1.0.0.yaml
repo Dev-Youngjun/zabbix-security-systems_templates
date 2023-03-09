@@ -1,0 +1,325 @@
+zabbix_export:
+  version: '6.0'
+  date: '2023-03-09T02:21:17Z'
+  groups:
+    -
+      uuid: 4e3ed3d328234a8fb65e33b600c74daf
+      name: Wins
+  templates:
+    -
+      uuid: daec10bf7df64c599513a4a1b84f0f26
+      template: 'SNMP Wins Devices v1.0.0'
+      name: 'SNMP Wins Devices v1.0.0'
+      description: |
+        ## Overview
+        Monitors: System Name, Serial N., OS version, Package Version, CPU%, RAM(Total, Free, Used, %), Disk(Total, Free, Used, %)
+        
+        ## Author
+        youngjun yoo
+      groups:
+        -
+          name: Wins
+      items:
+        -
+          uuid: d1b3fe14e9b348849b14947668eaea92
+          name: 'System Name'
+          type: SNMP_AGENT
+          snmp_oid: iso.3.6.1.4.1.8103.1001.1.0
+          key: soosanSystemName
+          delay: '3600'
+          trends: '0'
+          value_type: CHAR
+          inventory_link: NAME
+          tags:
+            -
+              tag: Application
+              value: 'Soosan Performance'
+            -
+              tag: component
+              value: system
+        -
+          uuid: 12c6a63645c44f7081d7cdba4ba24480
+          name: 'Firmware Version'
+          type: SNMP_AGENT
+          snmp_oid: iso.3.6.1.4.1.8103.1001.7.1.0
+          key: SysmFirmwareVersion
+          delay: '3600'
+          trends: '0'
+          value_type: CHAR
+          inventory_link: OS
+          tags:
+            -
+              tag: Application
+              value: 'Wins Performance'
+            -
+              tag: component
+              value: system
+        -
+          uuid: 757c4fb52eea444fa28f777e965a4534
+          name: 'Serial Number'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.10188.5.6.2.2.0
+          key: SysmSerialNumber
+          delay: '3600'
+          trends: '0'
+          value_type: CHAR
+          inventory_link: SERIALNO_A
+          tags:
+            -
+              tag: Application
+              value: 'Wins Performance'
+            -
+              tag: component
+              value: system
+        -
+          uuid: 47b64ee872034b3b8b1c401a5efb6823
+          name: 'CPU utilization'
+          type: SNMP_AGENT
+          snmp_oid: iso.3.6.1.4.1.8103.1001.2.4.0
+          key: winsCPUUtil
+          delay: '60'
+          value_type: FLOAT
+          units: '%'
+          tags:
+            -
+              tag: Application
+              value: 'Wins Performance'
+            -
+              tag: component
+              value: cpu
+          triggers:
+            -
+              uuid: d98a045143084462956913b0540ad0e3
+              expression: 'avg(/SNMP Wins Devices v1.0.0/winsCPUUtil,#5)>95'
+              name: 'Wins {HOSTNAME} - Usage of MP CPU over 95%'
+              priority: AVERAGE
+              description: 'CPU activity on Fortinet is more than 95% during the last five checks'
+        -
+          uuid: 9ed4f2fa5a374b209b5b57c048212a5b
+          name: 'Free Memory'
+          type: SNMP_AGENT
+          snmp_oid: iso.3.6.1.4.1.8103.1001.3.3.0
+          key: winsRAMFree
+          delay: '60'
+          value_type: FLOAT
+          units: GB
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |2
+                    var bytes = value * 1024;
+                    var gigabytes = bytes / (1024 * 1024 * 1024);
+                    gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                    return gigabytes;
+          tags:
+            -
+              tag: Application
+              value: 'Wins Performance'
+            -
+              tag: component
+              value: memory
+        -
+          uuid: 6bf0007d8ab0474b92a2c685f9b8ee80
+          name: 'Total Memory'
+          type: SNMP_AGENT
+          snmp_oid: iso.3.6.1.4.1.8103.1001.3.1.0
+          key: winsRAMTotal
+          delay: '60'
+          value_type: FLOAT
+          units: GB
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |2
+                    var bytes = value * 1024;
+                    var gigabytes = bytes / (1024 * 1024 * 1024);
+                    gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                    return gigabytes;
+          tags:
+            -
+              tag: Application
+              value: 'Wins Performance'
+            -
+              tag: component
+              value: memory
+        -
+          uuid: ee5499cb8e7e46bfa93df1409ba69201
+          name: 'Used Memory'
+          type: SNMP_AGENT
+          snmp_oid: iso.3.6.1.4.1.8103.1001.3.2.0
+          key: winsRAMUsed
+          delay: '60'
+          value_type: FLOAT
+          units: GB
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |2
+                    var bytes = value * 1024;
+                    var gigabytes = bytes / (1024 * 1024 * 1024);
+                    gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                    return gigabytes;
+          tags:
+            -
+              tag: Application
+              value: 'Wins Performance'
+            -
+              tag: component
+              value: memory
+        -
+          uuid: 8c3132742a5f4d9d829137100b9165b1
+          name: 'Memory utilization'
+          type: CALCULATED
+          key: winsRAMUtil
+          delay: '60'
+          value_type: FLOAT
+          units: '%'
+          params: '100*last(//winsRAMUsed)/last(//winsRAMTotal)'
+          tags:
+            -
+              tag: Application
+              value: 'Wins Performance'
+            -
+              tag: component
+              value: memory
+          triggers:
+            -
+              uuid: 5f1519b70bab4c86b17dc3eba5f4d22c
+              expression: 'avg(/SNMP Wins Devices v1.0.0/winsRAMUtil,#5)>100'
+              name: 'Wins {HOSTNAME} - MP Memory Usage Over 100%'
+              priority: AVERAGE
+        -
+          uuid: 61dbaea413b8483c916c1c048a9ae280
+          name: 'Wins Uptime'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.8103.1001.8.0
+          key: winsUpTime
+          delay: '30'
+          units: uptime
+          preprocessing:
+            -
+              type: MULTIPLIER
+              parameters:
+                - '1e-2'
+          tags:
+            -
+              tag: Application
+              value: 'Wins Performance'
+            -
+              tag: component
+              value: system
+      discovery_rules:
+        -
+          uuid: 83b6811223c942f9a50aebbd6af16104
+          name: 'Mounted filesystem discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#FSNAME},iso.3.6.1.4.1.8103.1001.4.1.3]'
+          key: 'winsfsdiscovery[snmp]'
+          item_prototypes:
+            -
+              uuid: b05c0acc30cb4e209ce77586207aa363
+              name: 'Disk Free {#FSNAME}'
+              type: SNMP_AGENT
+              snmp_oid: 'iso.3.6.1.4.1.8103.1001.4.1.8.{#SNMPINDEX}'
+              key: 'winsDiskFree.[{#SNMPINDEX}]'
+              value_type: FLOAT
+              units: GB
+              preprocessing:
+                -
+                  type: JAVASCRIPT
+                  parameters:
+                    - |2
+                        var bytes = value * 1024;
+                        var gigabytes = bytes / (1024 * 1024);
+                        gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                        gigabytes = parseFloat(gigabytes)
+                        return gigabytes;
+              tags:
+                -
+                  tag: Application
+                  value: 'Wins Performance'
+                -
+                  tag: component
+                  value: storage
+            -
+              uuid: 5807af5f94c84a918ca62da404f25fe6
+              name: 'Total Disk {#FSNAME}'
+              type: SNMP_AGENT
+              snmp_oid: 'iso.3.6.1.4.1.8103.1001.4.1.6.{#SNMPINDEX}'
+              key: 'winsDiskTotal.[{#SNMPINDEX}]'
+              value_type: FLOAT
+              units: GB
+              preprocessing:
+                -
+                  type: JAVASCRIPT
+                  parameters:
+                    - |2
+                        var bytes = value * 1024;
+                        var gigabytes = bytes / (1024 * 1024);
+                        gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                        return gigabytes;
+              tags:
+                -
+                  tag: Application
+                  value: 'Wins Performance'
+                -
+                  tag: component
+                  value: storage
+            -
+              uuid: 184b14923688479d8df7d9ab97540518
+              name: 'Disk Used {#FSNAME}'
+              type: SNMP_AGENT
+              snmp_oid: 'iso.3.6.1.4.1.8103.1001.4.1.7.{#SNMPINDEX}'
+              key: 'winsDiskUsed.[{#SNMPINDEX}]'
+              value_type: FLOAT
+              units: GB
+              preprocessing:
+                -
+                  type: JAVASCRIPT
+                  parameters:
+                    - |2
+                        var bytes = value * 1024;
+                        var gigabytes = bytes / (1024 * 1024);
+                        gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                        return gigabytes;
+              tags:
+                -
+                  tag: Application
+                  value: 'Wins Performance'
+                -
+                  tag: component
+                  value: storage
+            -
+              uuid: 137882059d384292b8c70ad9b0417f44
+              name: 'Disk utilization {#FSNAME}'
+              type: CALCULATED
+              key: 'winsDiskUtil.[{#SNMPINDEX}]'
+              units: '%'
+              params: '100*last(//winsDiskUsed.[{#SNMPINDEX}])/last(//winsDiskTotal.[{#SNMPINDEX}])'
+              tags:
+                -
+                  tag: Application
+                  value: 'Wins Performance'
+                -
+                  tag: component
+                  value: storage
+      macros:
+        -
+          macro: '{$SNMP_COMMUNITY}'
+          value: SI
+  graphs:
+    -
+      uuid: 4a781ea64c9344fdaf95847d76bfa95e
+      name: 'CPU %'
+      show_work_period: 'NO'
+      graph_items:
+        -
+          sortorder: '1'
+          drawtype: GRADIENT_LINE
+          color: FFFF00
+          item:
+            host: 'SNMP Wins Devices v1.0.0'
+            key: winsCPUUtil
