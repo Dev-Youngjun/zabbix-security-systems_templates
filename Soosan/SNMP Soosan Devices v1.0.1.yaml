@@ -1,0 +1,541 @@
+zabbix_export:
+  version: '6.0'
+  date: '2023-03-09T07:55:31Z'
+  groups:
+    -
+      uuid: 27e7651f3b57410fa0e81073ca796eec
+      name: Soosan
+  templates:
+    -
+      uuid: 11de2ab2227b43ac9aff39b603553708
+      template: 'SNMP Soosan Devices v1.0.0'
+      name: 'SNMP Soosan Devices v1.0.0'
+      description: |
+        ## Overview
+        Monitors: System Name, Serial N., OS version, Package Version, CPU%, RAM(Total, Free, Used, %), Disk(Total, Free, Used, %), NIC Status
+        
+        ## Author
+        youngjun yoo
+      groups:
+        -
+          name: Soosan
+      items:
+        -
+          uuid: 4d3a69ab5e8443fc9ad332d5e5bad347
+          name: 'ICMP ping'
+          type: SIMPLE
+          key: icmpping
+          history: 1w
+          tags:
+            -
+              tag: component
+              value: health
+            -
+              tag: component
+              value: network
+          triggers:
+            -
+              uuid: e9fbfdf6923649c896ec2f8496b59717
+              expression: 'max(/SNMP Soosan Devices v1.0.0/icmpping,#3)=0'
+              name: 'Unavailable by ICMP ping'
+              priority: HIGH
+              description: 'Last three attempts returned timeout.  Please check device connectivity.'
+              tags:
+                -
+                  tag: scope
+                  value: availability
+        -
+          uuid: 770eeb08f85f49299ae1c92016254dc4
+          name: 'ICMP loss'
+          type: SIMPLE
+          key: icmppingloss
+          history: 1w
+          value_type: FLOAT
+          units: '%'
+          tags:
+            -
+              tag: component
+              value: health
+            -
+              tag: component
+              value: network
+          triggers:
+            -
+              uuid: 8ad440d799b048238c5af822f4428a0c
+              expression: 'min(/SNMP Soosan Devices v1.0.0/icmppingloss,5m)>{$ICMP_LOSS_WARN} and min(/SNMP Soosan Devices v1.0.0/icmppingloss,5m)<100'
+              name: 'High ICMP ping loss'
+              opdata: 'Loss: {ITEM.LASTVALUE1}'
+              priority: WARNING
+              dependencies:
+                -
+                  name: 'Unavailable by ICMP ping'
+                  expression: 'max(/SNMP Soosan Devices v1.0.0/icmpping,#3)=0'
+              tags:
+                -
+                  tag: scope
+                  value: availability
+                -
+                  tag: scope
+                  value: performance
+        -
+          uuid: 8e0a341270ad4ea380f90045d24d9a94
+          name: 'ICMP response time'
+          type: SIMPLE
+          key: icmppingsec
+          history: 1w
+          value_type: FLOAT
+          units: s
+          tags:
+            -
+              tag: component
+              value: health
+            -
+              tag: component
+              value: network
+          triggers:
+            -
+              uuid: 0c5985bf2b0e499eb0a5096e09fa3802
+              expression: 'avg(/SNMP Soosan Devices v1.0.0/icmppingsec,5m)>{$ICMP_RESPONSE_TIME_WARN}'
+              name: 'High ICMP ping response time'
+              opdata: 'Value: {ITEM.LASTVALUE1}'
+              priority: WARNING
+              dependencies:
+                -
+                  name: 'High ICMP ping loss'
+                  expression: 'min(/SNMP Soosan Devices v1.0.0/icmppingloss,5m)>{$ICMP_LOSS_WARN} and min(/SNMP Soosan Devices v1.0.0/icmppingloss,5m)<100'
+                -
+                  name: 'Unavailable by ICMP ping'
+                  expression: 'max(/SNMP Soosan Devices v1.0.0/icmpping,#3)=0'
+              tags:
+                -
+                  tag: scope
+                  value: availability
+                -
+                  tag: scope
+                  value: performance
+        -
+          uuid: 248e392909d147a69ba9ca6c308fa8d2
+          name: 'CPU utilization'
+          type: SNMP_AGENT
+          snmp_oid: iso.3.6.1.4.1.8403.78.1.1.2.1.2.1
+          key: soosanCPUUtil
+          delay: '60'
+          value_type: FLOAT
+          units: '%'
+          tags:
+            -
+              tag: Application
+              value: 'Soosan Performance'
+            -
+              tag: component
+              value: cpu
+          triggers:
+            -
+              uuid: 653be67984764a218ceec836adbf054a
+              expression: 'avg(/SNMP Soosan Devices v1.0.0/soosanCPUUtil,#5)>95'
+              name: 'Soosan {HOSTNAME} - Usage of MP CPU over 95%'
+              priority: AVERAGE
+              description: 'CPU activity on Fortinet is more than 95% during the last five checks'
+        -
+          uuid: d22f0b890fec483da47e9c0b09d72268
+          name: 'Free Memory'
+          type: SNMP_AGENT
+          snmp_oid: iso.3.6.1.4.1.8403.78.1.1.3.1.4.1
+          key: soosanRAMFree
+          delay: '60'
+          value_type: FLOAT
+          units: GB
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |2
+                    var bytes = value * 1024;
+                    var gigabytes = bytes / (1024 * 1024 * 1024);
+                    gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                    return gigabytes;
+          tags:
+            -
+              tag: Application
+              value: 'Soosan Performance'
+            -
+              tag: component
+              value: memory
+        -
+          uuid: d768c835ef7d43edb1ae9495a5284240
+          name: 'Total Memory'
+          type: SNMP_AGENT
+          snmp_oid: iso.3.6.1.4.1.8403.78.1.1.3.1.2.1
+          key: soosanRAMTotal
+          delay: '60'
+          value_type: FLOAT
+          units: GB
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |2
+                    var bytes = value * 1024;
+                    var gigabytes = bytes / (1024 * 1024 * 1024);
+                    gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                    return gigabytes;
+          tags:
+            -
+              tag: Application
+              value: 'Soosan Performance'
+            -
+              tag: component
+              value: memory
+        -
+          uuid: bd945a60a8404b449c447d5a04d61c3a
+          name: 'Used Memory'
+          type: SNMP_AGENT
+          snmp_oid: iso.3.6.1.4.1.8403.78.1.1.3.1.3.1
+          key: soosanRAMUsed
+          delay: '60'
+          value_type: FLOAT
+          units: GB
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |2
+                    var bytes = value * 1024;
+                    var gigabytes = bytes / (1024 * 1024 * 1024);
+                    gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                    return gigabytes;
+          tags:
+            -
+              tag: Application
+              value: 'Soosan Performance'
+            -
+              tag: component
+              value: memory
+        -
+          uuid: 032d7067f4f24729954d2eb2573673bb
+          name: 'Memory utilization'
+          type: SNMP_AGENT
+          snmp_oid: iso.3.6.1.4.1.8403.78.1.1.3.1.5.1
+          key: soosanRAMUtil
+          delay: '60'
+          value_type: FLOAT
+          units: '%'
+          tags:
+            -
+              tag: Application
+              value: 'Soosan Performance'
+            -
+              tag: component
+              value: memory
+          triggers:
+            -
+              uuid: fb62b9ada28b451ea30c2b4102b958c3
+              expression: 'avg(/SNMP Soosan Devices v1.0.0/soosanRAMUtil,#5)>100'
+              name: 'Soosan {HOSTNAME} - MP Memory Usage Over 100%'
+              priority: AVERAGE
+        -
+          uuid: 70bf86847b574c0da80daae35d299ee5
+          name: 'System Name'
+          type: SNMP_AGENT
+          snmp_oid: iso.3.6.1.4.1.8403.78.1.2.1.0
+          key: soosanSystemName
+          delay: '3600'
+          trends: '0'
+          value_type: CHAR
+          inventory_link: NAME
+          tags:
+            -
+              tag: Application
+              value: 'Soosan Performance'
+            -
+              tag: component
+              value: system
+        -
+          uuid: f35e895c2dd24a3cb0d620384090f829
+          name: 'Firmware Version'
+          type: SNMP_AGENT
+          snmp_oid: iso.3.6.1.4.1.8403.78.1.2.3.0
+          key: SysmFirmwareVersion
+          delay: '3600'
+          trends: '0'
+          value_type: CHAR
+          inventory_link: OS
+          tags:
+            -
+              tag: Application
+              value: 'Soosan Performance'
+            -
+              tag: component
+              value: system
+        -
+          uuid: 40e524eebfa44a6d9e41b0125210e3cf
+          name: 'Package Version'
+          type: SNMP_AGENT
+          snmp_oid: iso.3.6.1.4.1.8403.78.1.2.2.0
+          key: SysmPackageVersion
+          delay: '3600'
+          trends: '0'
+          value_type: CHAR
+          inventory_link: SOFTWARE_FULL
+          tags:
+            -
+              tag: Application
+              value: 'Soosan Performance'
+            -
+              tag: component
+              value: system
+        -
+          uuid: 42cd71239a124d1cbc11a7ed24c5c4ea
+          name: 'Serial Number'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.10188.5.6.2.2.0
+          key: SysmSerialNumber
+          delay: '3600'
+          trends: '0'
+          value_type: CHAR
+          inventory_link: SERIALNO_A
+          tags:
+            -
+              tag: Application
+              value: 'Soosan Performance'
+            -
+              tag: component
+              value: system
+        -
+          uuid: 2cb9e9cac07e4df992acdbb04cb1851f
+          name: 'MAC Address'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.10188.5.6.2.8.0
+          key: SystemMacAddress
+          delay: '3600'
+          trends: '0'
+          value_type: CHAR
+          inventory_link: MACADDRESS_A
+          tags:
+            -
+              tag: Application
+              value: 'Soosan Performance'
+            -
+              tag: component
+              value: system
+        -
+          uuid: 88bddf1ce4d8422da4983085b406e780
+          name: 'SNMP agent availability'
+          type: INTERNAL
+          key: 'zabbix[host,snmp,available]'
+          history: 7d
+          description: |
+            Availability of SNMP checks on the host. The value of this item corresponds to availability icons in the host list.
+            Possible value:
+            0 - not available
+            1 - available
+            2 - unknown
+          tags:
+            -
+              tag: component
+              value: health
+            -
+              tag: component
+              value: network
+          triggers:
+            -
+              uuid: 80077b60715f4032b77c1f59ec3dc97f
+              expression: 'max(/SNMP Soosan Devices v1.0.0/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0'
+              name: 'No SNMP data collection'
+              opdata: 'Current state: {ITEM.LASTVALUE1}'
+              priority: WARNING
+              description: 'SNMP is not available for polling. Please check device connectivity and SNMP settings.'
+              dependencies:
+                -
+                  name: 'Unavailable by ICMP ping'
+                  expression: 'max(/SNMP Soosan Devices v1.0.0/icmpping,#3)=0'
+              tags:
+                -
+                  tag: scope
+                  value: availability
+      discovery_rules:
+        -
+          uuid: e17ef8dec7f8477596fe9a7f9af1bfd2
+          name: 'soosan filesystem discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#FSNAME},iso.3.6.1.4.1.8403.78.1.1.4.1.2]'
+          key: 'soosandiskdiscovery[snmp]'
+          item_prototypes:
+            -
+              uuid: a10c476a4888452b9fc1850922cf334f
+              name: 'Free Disk {#FSNAME}'
+              type: SNMP_AGENT
+              snmp_oid: 'iso.3.6.1.4.1.8403.78.1.1.4.1.5.{#SNMPINDEX}'
+              key: 'soosanFreeDisk.[{#SNMPINDEX}]'
+              value_type: FLOAT
+              units: GB
+              preprocessing:
+                -
+                  type: JAVASCRIPT
+                  parameters:
+                    - |2
+                        var bytes = value * 1024;
+                        var gigabytes = bytes / (1024 * 1024 * 1024);
+                        gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                        return gigabytes;
+              tags:
+                -
+                  tag: Application
+                  value: 'Soosan Performance'
+                -
+                  tag: component
+                  value: storage
+            -
+              uuid: 95fda0c255274bed8433dd9b1d2d16f7
+              name: 'Total Disk {#FSNAME}'
+              type: SNMP_AGENT
+              snmp_oid: 'iso.3.6.1.4.1.8403.78.1.1.4.1.3.{#SNMPINDEX}'
+              key: 'soosanTotalDisk.[{#SNMPINDEX}]'
+              value_type: FLOAT
+              units: GB
+              preprocessing:
+                -
+                  type: JAVASCRIPT
+                  parameters:
+                    - |2
+                        var bytes = value * 1024;
+                        var gigabytes = bytes / (1024 * 1024 * 1024);
+                        gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                        return gigabytes;
+              tags:
+                -
+                  tag: Application
+                  value: 'Soosan Performance'
+                -
+                  tag: component
+                  value: storage
+            -
+              uuid: e49353b6f17e44eaac6c2f309e0a6b59
+              name: 'Used Disk {#FSNAME}'
+              type: SNMP_AGENT
+              snmp_oid: 'iso.3.6.1.4.1.8403.78.1.1.4.1.4.{#SNMPINDEX}'
+              key: 'soosanUsedDisk.[{#SNMPINDEX}]'
+              value_type: FLOAT
+              units: GB
+              preprocessing:
+                -
+                  type: JAVASCRIPT
+                  parameters:
+                    - |2
+                        var bytes = value * 1024;
+                        var gigabytes = bytes / (1024 * 1024 * 1024);
+                        gigabytes = Math.round(gigabytes * 100) / 100; // 소수점 셋째 자리에서 반올림
+                        return gigabytes;
+              tags:
+                -
+                  tag: Application
+                  value: 'Soosan Performance'
+                -
+                  tag: component
+                  value: storage
+            -
+              uuid: 37bac916ca2640dea6b35c6384275298
+              name: 'Disk utilization {#FSNAME}'
+              type: SNMP_AGENT
+              snmp_oid: 'iso.3.6.1.4.1.8403.78.1.1.4.1.6.{#SNMPINDEX}'
+              key: 'soosanUtilDisk.[{#SNMPINDEX}]'
+              value_type: FLOAT
+              units: '%'
+              tags:
+                -
+                  tag: Application
+                  value: 'Soosan Performance'
+                -
+                  tag: component
+                  value: storage
+              trigger_prototypes:
+                -
+                  uuid: 9c93015c594344ddb1e1295bb9dd8af7
+                  expression: 'last(/SNMP Soosan Devices v1.0.0/soosanUtilDisk.[{#SNMPINDEX}])>90'
+                  name: 'Soosan {HOSTNAME} - Usage of FS {#FSNAME} over 90%'
+                  priority: AVERAGE
+                  tags:
+                    -
+                      tag: scope
+                      value: availability
+        -
+          uuid: 6a2997237a824c40b1df3f0e678e11f3
+          name: 'soosan interface discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#IFNAME},iso.3.6.1.4.1.8403.78.1.1.5.1.2]'
+          key: 'soosanifdiscovery[snmp]'
+          item_prototypes:
+            -
+              uuid: 5f8203b56a774a90a4137b028e769529
+              name: 'Link Speed {#IFNAME}'
+              type: SNMP_AGENT
+              snmp_oid: 'iso.3.6.1.4.1.8403.78.1.1.5.1.5.{#SNMPINDEX}'
+              key: 'soosanifHighSpeed.[{#IFNAME}]'
+              delay: 10m
+              tags:
+                -
+                  tag: Application
+                  value: 'Soosan Performance'
+                -
+                  tag: component
+                  value: network
+            -
+              uuid: da23e8a9d85f41eca491ead8161cac74
+              name: 'Link Status {#IFNAME}'
+              type: SNMP_AGENT
+              snmp_oid: 'iso.3.6.1.4.1.8403.78.1.1.5.1.3.{#SNMPINDEX}'
+              key: 'soosanifStat.[{#IFNAME}]'
+              delay: '30'
+              tags:
+                -
+                  tag: Application
+                  value: 'Soosan Performance'
+                -
+                  tag: component
+                  value: network
+              trigger_prototypes:
+                -
+                  uuid: 0e1b132f97b740b0b25aa0344e6b1789
+                  expression: 'last(/SNMP Soosan Devices v1.0.0/soosanifStat.[{#IFNAME}])<>2'
+                  name: '{#IFNAME} Interface Down'
+                  priority: AVERAGE
+                  tags:
+                    -
+                      tag: scope
+                      value: availability
+      tags:
+        -
+          tag: class
+          value: security
+        -
+          tag: target
+          value: 'eWalker SWG'
+        -
+          tag: target
+          value: soosan
+      macros:
+        -
+          macro: '{$ICMP_LOSS_WARN}'
+          value: '20'
+        -
+          macro: '{$ICMP_RESPONSE_TIME_WARN}'
+          value: '0.15'
+        -
+          macro: '{$SNMP.TIMEOUT}'
+          value: 5m
+        -
+          macro: '{$SNMP_COMMUNITY}'
+          value: SI
+  graphs:
+    -
+      uuid: e9b9e00ba5ec4b74908be3d3ea251b0f
+      name: 'CPU %'
+      show_work_period: 'NO'
+      graph_items:
+        -
+          sortorder: '1'
+          drawtype: GRADIENT_LINE
+          color: FFFF00
+          item:
+            host: 'SNMP Soosan Devices v1.0.0'
+            key: soosanCPUUtil
