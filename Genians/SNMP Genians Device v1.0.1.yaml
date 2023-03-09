@@ -12,7 +12,7 @@ zabbix_export:
       name: 'SNMP Genians Device v1.0.0'
       description: |
         ## Overview
-        Monitors:  System Uptime, CPU%, RAM%, Disk (Total and Used and %)
+        Monitors:  System Uptime, CPU%, RAM, Disk, interfaces, healthcheck
         
         ## Author
         Youngjun Yoo
